@@ -1,0 +1,107 @@
+.page {
+  padding: 32px 40px;
+  max-width: 960px;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navButton {
+  background: none;
+  border: 1px solid #cfcccc;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.navButton:disabled {
+  color: #a9a6a6;
+  border-color: #e3e1e1;
+  cursor: default;
+}
+
+.weekLabel {
+  font-weight: 800;
+}
+
+.weekendToggle {
+  font-size: 13px;
+  color: #444141;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.banner {
+  background: #eae9e9;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+}
+
+.rejectedBanner {
+  background: #f6c8c4;
+  color: #7a1c14;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.messageInput {
+  flex: 1;
+  min-width: 220px;
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 8px 10px;
+  border: 1px solid #cfcccc;
+}
+
+.button {
+  background: #0f7a43;
+  color: #f3f2f2;
+  border: none;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  composes: button;
+  background: #444141;
+}
+
+.button:disabled {
+  background: #a9c9b9;
+  cursor: default;
+}
+
+.overLimitError {
+  color: #7a1c14;
+  font-size: 13px;
+}
+
+.saveError {
+  color: #7a1c14;
+  font-size: 13px;
+  margin-top: 8px;
+}

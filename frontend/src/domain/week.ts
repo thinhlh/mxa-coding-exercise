@@ -22,3 +22,25 @@ export function weekStartFor(epochSeconds: number): Date {
   utcDay.setUTCDate(utcDay.getUTCDate() - weekday)
   return utcDay
 }
+
+// True once the given Monday (as an ISO date string) is before the current week's.
+export function isBeforeCurrentWeek(weekStartIso: string): boolean {
+  const [year, month, day] = weekStartIso.split('-').map(Number)
+  const weekStart = Date.UTC(year, month - 1, day)
+  const currentWeekStart = weekStartFor(Math.floor(Date.now() / 1000)).getTime()
+  return weekStart < currentWeekStart
+}
+
+// The calendar date for each day of the week, given its Monday as an ISO date string.
+export function datesForWeek(weekStartIso: string): Record<Weekday, Date> {
+  const [year, month, day] = weekStartIso.split('-').map(Number)
+  const monday = new Date(Date.UTC(year, month - 1, day))
+
+  const dates = {} as Record<Weekday, Date>
+  DAYS.forEach((weekday, index) => {
+    const date = new Date(monday)
+    date.setUTCDate(monday.getUTCDate() + index)
+    dates[weekday] = date
+  })
+  return dates
+}

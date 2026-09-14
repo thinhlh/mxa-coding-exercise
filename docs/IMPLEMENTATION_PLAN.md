@@ -55,6 +55,17 @@ in the frontend grid only, plus a Pydantic check on the 24-hour cap in the
 API's write request body — neither is a domain function or a DB constraint,
 and the API does not compute or return `flaggedDays`.
 
+**Week bounds.** The current week is the latest a client may view or write —
+there is no next week's timesheet yet. A week already saved stays editable
+under the normal rule (`draft` or `rejected`) no matter how far in the past it
+is; a past week that was never saved cannot be turned into a new draft — only
+the current week can start one.
+
+Current implementation note: the future-week cap is a Pydantic check on
+`TimesheetWriteRequest.at`, not a domain function or a DB constraint. The
+frontend mirrors it by disabling "Next" once the grid is on the current week,
+and separately treats an unsaved (`id: null`) past week as read-only.
+
 ## Data model
 
 Hours are `INTEGER`, whole hours only. `week_start` is always a Monday.
@@ -387,7 +398,8 @@ pytest domain suite for every case under **The rules**.
   `/api/projects/by-code/{code}`, shows the project name or "no project has
   that code".
 - Previous/next week, this week on load; navigation sends epoch seconds and
-  lets the server pick the Monday.
+  lets the server pick the Monday. "Next" stops at the current week — see
+  **Week bounds**.
 - Optional message on Submit.
 - Submitted and approved are read-only and say so. Rejected is editable and
   shows `reviewMessage`.

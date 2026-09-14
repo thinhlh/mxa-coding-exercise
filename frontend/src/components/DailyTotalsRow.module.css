@@ -1,0 +1,25 @@
+.row {
+  font-weight: 800;
+}
+
+.label {
+  text-align: left;
+}
+
+.cell {
+  text-align: center;
+}
+
+.flagged {
+  background: #fbe8b0;
+  color: #6b4e00;
+}
+
+.flagged::after {
+  content: ' \26A0';
+}
+
+.overLimit {
+  background: #f6c8c4;
+  color: #7a1c14;
+}

@@ -1,0 +1,36 @@
+.form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.input {
+  width: 120px;
+  text-transform: uppercase;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 10px;
+  border: 1px solid #cfcccc;
+}
+
+.button {
+  background: #0f7a43;
+  color: #f3f2f2;
+  border: none;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.button:disabled {
+  background: #a9c9b9;
+  cursor: default;
+}
+
+.error {
+  color: #7a1c14;
+  font-size: 12.5px;
+}

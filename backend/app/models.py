@@ -50,6 +50,11 @@ class Timesheet(Base):
         UUID(as_uuid=True), ForeignKey("employees.id"), nullable=True
     )
 
+    employee: Mapped[Employee] = relationship(foreign_keys=[employee_id])
+    line_items: Mapped[list["TimesheetLineItem"]] = relationship(
+        back_populates="timesheet", cascade="all, delete-orphan"
+    )
+
 
 class TimesheetLineItem(Base):
     __tablename__ = "timesheet_line_items"
@@ -60,6 +65,8 @@ class TimesheetLineItem(Base):
         UUID(as_uuid=True), ForeignKey("timesheets.id", ondelete="CASCADE"), nullable=False
     )
     project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    timesheet: Mapped[Timesheet] = relationship(back_populates="line_items")
+    project: Mapped[Project] = relationship()
     hours_monday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     hours_tuesday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     hours_wednesday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

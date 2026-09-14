@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.projects import router as projects_router
+from app.api.timesheets import router as timesheets_router
 from app.auth import CurrentEmployee, current_employee
 from app.config import settings
 
@@ -22,6 +23,7 @@ app.add_middleware(
 )
 
 app.include_router(projects_router)
+app.include_router(timesheets_router)
 
 
 @app.get("/api/health", tags=["meta"], summary="Liveness check")

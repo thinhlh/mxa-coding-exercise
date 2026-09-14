@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useMe } from '../hooks/useMe'
 import { ProjectsPage } from '../pages/ProjectsPage'
 import { ReviewPage } from '../pages/ReviewPage'
-import { TimesheetPage } from '../pages/TimesheetPage'
+import { TimesheetWeekPage } from '../pages/TimesheetWeekPage'
 
 export function RoleAwareShell() {
   const { me, loading, error } = useMe()
@@ -20,7 +20,7 @@ export function RoleAwareShell() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={homePath} replace />} />
-      {me.role === 'employee' && <Route path="/timesheet" element={<TimesheetPage me={me} />} />}
+      {me.role === 'employee' && <Route path="/timesheet" element={<TimesheetWeekPage me={me} />} />}
       {me.role === 'manager' && (
         <>
           <Route path="/projects" element={<ProjectsPage me={me} />} />

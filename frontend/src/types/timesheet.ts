@@ -20,7 +20,6 @@ export interface Timesheet {
   lineItems: LineItem[]
   dailyTotals: DailyHours
   totalHours: number
-  flaggedDays: Weekday[]
   submitMessage: string | null
   reviewMessage: string | null
   submittedAt: string | null
