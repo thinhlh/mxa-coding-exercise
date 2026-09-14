@@ -52,6 +52,11 @@
   font-weight: var(--font-heading-weight);
 }
 
+.action {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .empty {
   color: color-mix(in srgb, var(--color-text) 55%, transparent);
   font-style: italic;

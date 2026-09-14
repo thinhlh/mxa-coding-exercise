@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppNav } from '../components/AppNav'
 import { useMe } from '../hooks/useMe'
 import { ProjectsPage } from '../pages/ProjectsPage'
+import { ProjectTimesheetsPage } from '../pages/ProjectTimesheetsPage'
 import { ReviewQueuePage } from '../pages/ReviewQueuePage'
 import { TimesheetReviewPage } from '../pages/TimesheetReviewPage'
 import { TimesheetWeekPage } from '../pages/TimesheetWeekPage'
@@ -30,6 +31,7 @@ export function RoleAwareShell() {
         {me.role === 'manager' && (
           <>
             <Route path="/projects" element={<ProjectsPage me={me} />} />
+            <Route path="/projects/:projectId" element={<ProjectTimesheetsPage me={me} />} />
             <Route path="/review" element={<ReviewQueuePage me={me} />} />
             <Route path="/review/:timesheetId" element={<TimesheetReviewPage />} />
           </>

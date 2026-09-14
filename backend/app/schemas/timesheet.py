@@ -8,10 +8,10 @@ from datetime import date, datetime, timezone
 from pydantic import field_validator
 
 from app.domain.week import week_start_for
-from app.schemas.base import CamelModel
+from app.schemas.base import AppModel
 
 
-class HoursInput(CamelModel):
+class HoursInput(AppModel):
     monday: int = 0
     tuesday: int = 0
     wednesday: int = 0
@@ -21,12 +21,12 @@ class HoursInput(CamelModel):
     sunday: int = 0
 
 
-class LineItemInput(CamelModel):
+class LineItemInput(AppModel):
     project_code: str
     hours: HoursInput
 
 
-class TimesheetWriteRequest(CamelModel):
+class TimesheetWriteRequest(AppModel):
     at: int | None = None
     line_items: list[LineItemInput] | None = None
     timesheet_id: uuid.UUID | None = None
@@ -44,13 +44,13 @@ class TimesheetWriteRequest(CamelModel):
         return value
 
 
-class LineItemResponse(CamelModel):
+class LineItemResponse(AppModel):
     project_code: str
     project_name: str
     hours: dict[str, int]
 
 
-class TimesheetResponse(CamelModel):
+class TimesheetResponse(AppModel):
     id: uuid.UUID | None
     week_start: date
     status: str

@@ -7,16 +7,16 @@ from datetime import date
 
 from pydantic import AliasPath, Field
 
-from app.schemas.base import CamelModel
+from app.schemas.base import AppModel
 
 
-class CreateProjectRequest(CamelModel):
+class CreateProjectRequest(AppModel):
     name: str
     description: str
     start_date: date
 
 
-class ProjectResponse(CamelModel):
+class ProjectResponse(AppModel):
     id: uuid.UUID
     code: str
     name: str

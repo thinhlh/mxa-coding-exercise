@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -25,10 +27,11 @@ def get_current_week(
 @router.get("/{timesheet_status}", response_model=list[TimesheetResponse])
 def list_by_status(
     timesheet_status: str,
+    project_id: uuid.UUID | None = Query(default=None, alias="projectId"),
     current: CurrentEmployee = Depends(current_employee),
     session: Session = Depends(get_session),
 ) -> list[dict]:
-    return timesheets_service.list_timesheets(session, current, timesheet_status)
+    return timesheets_service.list_timesheets(session, current, timesheet_status, project_id)
 
 
 @router.post("/{timesheet_status}", response_model=TimesheetResponse)

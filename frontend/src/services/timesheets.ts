@@ -5,8 +5,13 @@ export function getTimesheetForWeek(token: string, at: number): Promise<Timeshee
   return apiFetch<Timesheet>(`/timesheets?at=${at}`, { token })
 }
 
-export function listTimesheetsByStatus(token: string, timesheetStatus: TimesheetStatus): Promise<Timesheet[]> {
-  return apiFetch<Timesheet[]>(`/timesheets/${timesheetStatus}`, { token })
+export function listTimesheetsByStatus(
+  token: string,
+  timesheetStatus: TimesheetStatus,
+  projectId?: string,
+): Promise<Timesheet[]> {
+  const query = projectId ? `?projectId=${encodeURIComponent(projectId)}` : ''
+  return apiFetch<Timesheet[]>(`/timesheets/${timesheetStatus}${query}`, { token })
 }
 
 export function writeTimesheet(

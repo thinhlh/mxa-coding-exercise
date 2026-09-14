@@ -81,6 +81,16 @@ def _create_project(client: TestClient, name: str = "Northwind migration") -> st
     return response.json()["code"]
 
 
+def _create_project_full(client: TestClient, name: str = "Northwind migration") -> dict:
+    response = client.post(
+        "/api/projects",
+        json={"name": name, "description": "Some work", "startDate": "2026-01-05"},
+        headers=_manager_headers(),
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 def _week(code: str, **hours: int) -> dict:
     days = {day: 0 for day in ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")}
     days.update(hours)
@@ -179,3 +189,56 @@ def test_dropping_a_line_item_removes_it_from_the_week() -> None:
 
     assert response.status_code == 200
     assert [item["projectCode"] for item in response.json()["lineItems"]] == [second_code]
+
+
+def test_listing_submitted_timesheets_by_project_only_returns_timesheets_with_that_project() -> None:
+    client = TestClient(app)
+    first_project = _create_project_full(client)
+    second_project = _create_project_full(client, name="Contoso audit")
+
+    first_employee = _employee_headers(uuid.uuid4())
+    second_employee = _employee_headers(uuid.uuid4())
+
+    client.post(
+        "/api/timesheets/submitted",
+        json={"at": _MONDAY, "lineItems": [_week(first_project["code"], monday=8)]},
+        headers=first_employee,
+    )
+    client.post(
+        "/api/timesheets/submitted",
+        json={"at": _MONDAY, "lineItems": [_week(second_project["code"], monday=8)]},
+        headers=second_employee,
+    )
+
+    response = client.get(
+        f"/api/timesheets/submitted?projectId={first_project['id']}", headers=_manager_headers()
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert {item["projectCode"] for item in body[0]["lineItems"]} == {first_project["code"]}
+
+
+def test_listing_submitted_timesheets_by_project_matches_a_multi_project_timesheet_once() -> None:
+    client = TestClient(app)
+    first_project = _create_project_full(client)
+    second_project = _create_project_full(client, name="Contoso audit")
+    employee = _employee_headers(uuid.uuid4())
+
+    client.post(
+        "/api/timesheets/submitted",
+        json={
+            "at": _MONDAY,
+            "lineItems": [_week(first_project["code"], monday=4), _week(second_project["code"], monday=4)],
+        },
+        headers=employee,
+    )
+
+    response = client.get(
+        f"/api/timesheets/submitted?projectId={first_project['id']}", headers=_manager_headers()
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1

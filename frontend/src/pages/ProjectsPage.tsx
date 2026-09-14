@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { ProjectForm } from '../components/ProjectForm'
 import { useProjects } from '../hooks/useProjects'
@@ -87,6 +88,7 @@ export function ProjectsPage({ me }: ProjectsPageProps) {
                 <th scope="col">Project</th>
                 <th scope="col">Start date</th>
                 <th scope="col">Description</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -96,6 +98,11 @@ export function ProjectsPage({ me }: ProjectsPageProps) {
                   <td className={styles.name}>{project.name}</td>
                   <td>{formatStartDate(project.startDate)}</td>
                   <td className="text-muted">{project.description}</td>
+                  <td className={styles.action}>
+                    <Link className="btn btn-secondary" to={`/projects/${project.id}`}>
+                      Open
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
