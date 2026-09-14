@@ -13,10 +13,10 @@ deploy/           docker-compose.yml, Keycloak realm import
 
 | Area | Decision |
 | --- | --- |
-| Backend | Python 3.12, FastAPI, `uv` |
+| Backend | Python 3.12, FastAPI, `pip` + `venv` |
 | Database | One PostgreSQL 16 instance, two databases in it: `mxa` and `keycloak` |
 | ORM | SQLAlchemy 2.0 typed models, Alembic |
-| Frontend | React 18, TypeScript, Vite, `react-router-dom`, plain CSS |
+| Frontend | React 18, TypeScript, Vite, `react-router-dom`, plain CSS, `yarn` |
 | Frontend fetching | `fetch` in `services/`, `useState`/`useEffect` in `hooks/` — no query library |
 | Auth | Keycloak OIDC, PKCE in the browser, JWT validated against JWKS on the API |
 | Week resolution | Client sends seconds since epoch, server resolves it to that week's Monday (ADR 0002) |
@@ -225,10 +225,12 @@ Phase 0 ──┬── Phase 1 ──┬── Phase 4 ── Phase 5 ── Ph
 
 ### Phase 0 — Scaffolding
 
-- `backend/pyproject.toml`: fastapi, uvicorn, sqlalchemy, alembic, psycopg,
-  pydantic-settings, pyjwt, httpx; dev pytest, ruff. Plus a `Dockerfile`.
+- `backend/requirements.txt`: fastapi, uvicorn, sqlalchemy, alembic, psycopg,
+  pydantic-settings, pyjwt, httpx; `requirements-dev.txt` adds pytest.
+  Plus a `Dockerfile`.
 - `frontend/package.json`: vite react-ts, react-router-dom, oidc-client-ts,
-  react-oidc-context; dev vitest, eslint, prettier. Plus a `Dockerfile`.
+  react-oidc-context; dev vitest, eslint, prettier, managed with `yarn`. Plus a
+  `Dockerfile`.
 - `deploy/docker-compose.yml`, four services:
   - `postgres` — an init script creating `mxa` and `keycloak`.
   - `keycloak` — on the `keycloak` database, realm import mounted.
@@ -244,7 +246,11 @@ Phase 0 ──┬── Phase 1 ──┬── Phase 4 ── Phase 5 ── Ph
   vitest).
 - Settings from the environment: `DATABASE_URL`, `KEYCLOAK_ISSUER`,
   `KEYCLOAK_AUDIENCE`, `CORS_ORIGINS`. No default that differs from a deployed
-  value.
+  value. `docker-compose.yml` reads its own values (DB and Keycloak admin
+  credentials, these four) from `deploy/.env`, gitignored, with
+  `deploy/.env.example` checked in; the two credential passwords are stored
+  base64-encoded there and decoded by the `Makefile` before `docker compose`
+  runs.
 - README **Setup** section, replacing TBD.
 
 _Done:_ `make up` on a clean machine serves the app at `:5173` against a

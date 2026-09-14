@@ -1,2 +1,20 @@
 .claude
 .agents
+
+# Backend
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Deploy
+deploy/.env
+
+# Editors / OS
+.DS_Store

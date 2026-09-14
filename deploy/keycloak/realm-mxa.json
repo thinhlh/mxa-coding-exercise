@@ -1,0 +1,60 @@
+{
+  "realm": "mxa",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [{ "name": "employee" }, { "name": "manager" }]
+  },
+  "clients": [
+    {
+      "clientId": "mxa-web",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "mxa-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "mxa-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "jamie.employee",
+      "email": "jamie.employee@mxa.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Jamie",
+      "lastName": "Employee",
+      "credentials": [{ "type": "password", "value": "password", "temporary": false }],
+      "realmRoles": ["employee"]
+    },
+    {
+      "username": "jamie.manager",
+      "email": "jamie.manager@mxa.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Jamie",
+      "lastName": "Manager",
+      "credentials": [{ "type": "password", "value": "password", "temporary": false }],
+      "realmRoles": ["manager"]
+    }
+  ]
+}

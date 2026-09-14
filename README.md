@@ -61,4 +61,39 @@ Keycloak should be used as IAM for MVP
 
 # Setup
 
-TBD
+Local development only — the seeded Keycloak realm and dev credentials below
+are not for a deployed environment.
+
+## Run everything
+
+```
+cp deploy/.env.example deploy/.env  # first time only
+make up
+```
+
+Builds and starts Postgres, Keycloak, the backend and the frontend via
+`docker compose`, reading credentials and settings from `deploy/.env`. The
+frontend is served at http://localhost:5173, the API at http://localhost:8000,
+Keycloak at http://localhost:8080.
+
+Seeded logins (realm `mxa`, client `mxa-web`). Each has a temporary password;
+Keycloak prompts to set a permanent one on first login:
+
+| Role | Username | Temporary password |
+| --- | --- | --- |
+| Employee | `jamie.employee` | `password` |
+| Manager | `jamie.manager` | `password` |
+
+## Run the tests
+
+```
+make test
+```
+
+Requires the backend virtualenv and frontend dependencies to be installed
+first:
+
+```
+cd backend && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements-dev.txt
+cd frontend && yarn install
+```
