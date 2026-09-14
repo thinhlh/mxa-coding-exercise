@@ -7,5 +7,5 @@
 .error {
   margin: 0;
   font-size: 13px;
-  color: var(--color-accent-700);
+  color: var(--color-danger-emphasis);
 }

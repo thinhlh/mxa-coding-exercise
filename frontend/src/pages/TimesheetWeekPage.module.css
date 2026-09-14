@@ -46,7 +46,7 @@
 
 .rejectedBanner {
   background: var(--color-danger-bg);
-  border-left-color: var(--color-accent);
+  border-left-color: var(--color-danger);
   color: var(--color-danger-text);
 }
 
@@ -67,5 +67,5 @@
 .saveError {
   margin-top: var(--space-2);
   font-size: 13px;
-  color: var(--color-accent-700);
+  color: var(--color-danger-emphasis);
 }
