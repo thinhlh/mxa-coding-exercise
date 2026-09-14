@@ -28,7 +28,7 @@ project by that code.
 
 **Timesheets.** One week is the period. A timesheet holds line items; each
 line item is one project code with an hours entry per day of that week,
-minimum 0.
+minimum 0. Whole hours only — no fractions.
 
 **The two hour rules are different, and the difference matters:**
 

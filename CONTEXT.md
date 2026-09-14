@@ -34,7 +34,8 @@ week. An employee adds a line item by entering a project code.
 _Avoid_: row, task, activity, booking
 
 **Hours entry**:
-The hours recorded on one line item for one day. Minimum 0.
+The hours recorded on one line item for one day. A whole number, minimum 0 —
+no fractional hours.
 _Avoid_: cell, slot, unit
 
 **Daily total**:

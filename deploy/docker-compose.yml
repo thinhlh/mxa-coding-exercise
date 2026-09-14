@@ -47,7 +47,7 @@ services:
   backend:
     build: ../backend
     environment:
-      DATABASE_URL: postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      DATABASE_URL: postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${DB_NAME}
       KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
       KEYCLOAK_JWKS_URL: ${KEYCLOAK_JWKS_URL}
       KEYCLOAK_AUDIENCE: ${KEYCLOAK_AUDIENCE}

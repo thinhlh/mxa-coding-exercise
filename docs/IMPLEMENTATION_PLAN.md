@@ -14,6 +14,7 @@ deploy/           docker-compose.yml, Keycloak realm import
 | Area | Decision |
 | --- | --- |
 | Backend | Python 3.12, FastAPI, `pip` + `venv` |
+| Backend layering | `app/api/` routers stay thin — parse the request, call one service function, return its result. `app/services/` holds the logic, returns plain `dict`/`list[dict]`, and is the one place `HTTPException` is raised for domain errors. `app/schemas/` holds the Pydantic request/response DTOs, keyed by the response route's `response_model`, per [FastAPI's bigger-applications pattern](https://fastapi.tiangolo.com/tutorial/bigger-applications/) |
 | Database | One PostgreSQL 16 instance, two databases in it: `mxa` and `keycloak` |
 | ORM | SQLAlchemy 2.0 typed models, Alembic |
 | Frontend | React 18, TypeScript, Vite, `react-router-dom`, CSS Modules per component (ADR 0003), `yarn` |
@@ -42,7 +43,12 @@ unflagged. A Monday of 25 is refused.
 
 ADR 0001 puts these rules in the browser and the API. Both sides test the same
 boundaries (Phase 1, Phase 9): exactly 24, exactly 8, a weekday of 0, two line
-items summing to 25 on one day, an untouched weekend, `7.5 + 0.5 == 8`.
+items summing to 25 on one day, an untouched weekend.
+
+Hours entries are whole hours only — no fractions. That removes any
+floating-point drift risk in the browser's running totals (`daily_totals`
+sums plain integers, so `5 + 3 === 8` exactly), which is why neither side
+needs a rounding step before comparing a day's total to 24 or 8.
 
 Current implementation note: the 24-hour cap and the 8-hour flag are enforced
 in the frontend grid only, plus a Pydantic check on the 24-hour cap in the
@@ -51,7 +57,7 @@ and the API does not compute or return `flaggedDays`.
 
 ## Data model
 
-Hours are `NUMERIC(4,2)`. `week_start` is always a Monday.
+Hours are `INTEGER`, whole hours only. `week_start` is always a Monday.
 
 **employees** — Keycloak subjects, upserted on first authenticated request.
 
@@ -100,7 +106,7 @@ survives the employee's next submit.
 | `id` | UUID PK | |
 | `timesheet_id` | UUID | FK timesheets.id, ON DELETE CASCADE |
 | `project_id` | UUID | FK projects.id |
-| `hours_monday` … `hours_sunday` | NUMERIC(4,2) | NOT NULL default 0, CHECK `>= 0 AND <= 24` |
+| `hours_monday` … `hours_sunday` | INTEGER | NOT NULL default 0, CHECK `>= 0 AND <= 24` |
 
 UNIQUE `(timesheet_id, project_id)`. Seven columns rather than a child table:
 the week is the only period, so the shape is fixed.
@@ -120,7 +126,7 @@ wire. Hours keyed `monday` … `sunday`. Errors are
 | GET | `/api/me` | both | `{employeeId, displayName, role}` |
 | POST | `/api/projects` | manager | create; response carries the generated code |
 | GET | `/api/projects` | manager | own projects with codes |
-| GET | `/api/projects/by-code/{code}` | both | resolve a code to a project name |
+| GET | `/api/projects/by-code/{code}` | both | resolve a code to its project |
 | GET | `/api/timesheets?at={epochSeconds}` | employee | own timesheet for that week |
 | GET | `/api/timesheets/{status}` | both | timesheets in that status |
 | POST | `/api/timesheets/{status}` | both | write a timesheet into that status |
@@ -360,7 +366,8 @@ and an expired token returns the user to Keycloak.
 ### Phase 9 — Frontend rule mirror
 
 `frontend/src/domain/hours.ts` and `week.ts` — same functions and day ordering
-as Phase 1. Compare on a rounded value so `7.5 + 0.5` reads as 8.
+as Phase 1. Hours are whole numbers, so the running totals sum exactly with no
+rounding step needed.
 
 _Done:_ `hours.test.ts` and `week.test.ts` assert the same outcomes as the
 pytest domain suite for every case under **The rules**.

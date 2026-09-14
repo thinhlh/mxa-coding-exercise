@@ -1,14 +1,6 @@
-export const WEEKDAYS = [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday',
-] as const
+import type { Weekday } from '../domain/week'
 
-export type Weekday = (typeof WEEKDAYS)[number]
+export type { Weekday }
 
 export type DailyHours = Record<Weekday, number>
 

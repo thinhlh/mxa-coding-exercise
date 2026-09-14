@@ -2,24 +2,20 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
-
 from app.domain.hours import LineItemHours, daily_totals
 
 
 def test_sums_multiple_line_items_per_day():
-    totals = daily_totals([LineItemHours(monday=Decimal(20)), LineItemHours(monday=Decimal(5))])
-    assert totals["monday"] == Decimal(25)
+    totals = daily_totals([LineItemHours(monday=20), LineItemHours(monday=5)])
+    assert totals["monday"] == 25
 
 
 def test_an_untouched_day_totals_zero():
     totals = daily_totals([LineItemHours()])
-    assert totals["monday"] == Decimal(0)
-    assert totals["sunday"] == Decimal(0)
+    assert totals["monday"] == 0
+    assert totals["sunday"] == 0
 
 
-def test_decimal_split_hours_sum_exactly():
-    totals = daily_totals(
-        [LineItemHours(monday=Decimal("7.5")), LineItemHours(monday=Decimal("0.5"))]
-    )
-    assert totals["monday"] == Decimal(8)
+def test_multiple_line_items_sum_to_exactly_eight():
+    totals = daily_totals([LineItemHours(monday=5), LineItemHours(monday=3)])
+    assert totals["monday"] == 8

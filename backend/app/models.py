@@ -3,9 +3,9 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, UniqueConstraint
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -30,6 +30,8 @@ class Project(Base):
     description: Mapped[str] = mapped_column(String, nullable=False)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    manager: Mapped[Employee] = relationship(foreign_keys=[manager_id])
 
 
 class Timesheet(Base):
@@ -58,10 +60,10 @@ class TimesheetLineItem(Base):
         UUID(as_uuid=True), ForeignKey("timesheets.id", ondelete="CASCADE"), nullable=False
     )
     project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
-    hours_monday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
-    hours_tuesday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
-    hours_wednesday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
-    hours_thursday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
-    hours_friday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
-    hours_saturday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
-    hours_sunday: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False, default=0)
+    hours_monday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hours_tuesday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hours_wednesday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hours_thursday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hours_friday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hours_saturday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hours_sunday: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
