@@ -62,6 +62,11 @@ services:
 
   frontend:
     build: ../frontend
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      VITE_KEYCLOAK_ISSUER: ${VITE_KEYCLOAK_ISSUER}
+      VITE_KEYCLOAK_CLIENT_ID: ${VITE_KEYCLOAK_CLIENT_ID}
+      VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
     ports:
       - "5173:5173"
     depends_on:

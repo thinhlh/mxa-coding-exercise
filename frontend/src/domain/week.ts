@@ -31,6 +31,18 @@ export function isBeforeCurrentWeek(weekStartIso: string): boolean {
   return weekStart < currentWeekStart
 }
 
+const WEEK_START_FORMAT = new Intl.DateTimeFormat(undefined, {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+// A week's Monday as it is written on screen, given that Monday as an ISO date string.
+export function formatWeekStart(weekStartIso: string): string {
+  return WEEK_START_FORMAT.format(new Date(`${weekStartIso}T00:00:00Z`))
+}
+
 // The calendar date for each day of the week, given its Monday as an ISO date string.
 export function datesForWeek(weekStartIso: string): Record<Weekday, Date> {
   const [year, month, day] = weekStartIso.split('-').map(Number)

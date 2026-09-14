@@ -1,0 +1,52 @@
+/* Layout only — .table, .btn and the type scale come from the design system. */
+.page {
+  padding: var(--app-page-pad-block) var(--app-page-pad-inline);
+  max-width: var(--app-page-max);
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.wrapper {
+  overflow-x: auto;
+}
+
+.employee {
+  font-weight: var(--font-heading-weight);
+}
+
+.week {
+  white-space: nowrap;
+}
+
+/* Same warning hue and glyph as the grid's totals row — a flagged day must read the
+   same way in the queue as it does in the timesheet it came from. */
+.flaggedDays {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.flaggedDays::after {
+  content: ' \26A0';
+}
+
+.action {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.legend {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+
+.empty {
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  font-style: italic;
+}

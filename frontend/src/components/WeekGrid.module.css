@@ -1,43 +1,35 @@
+/* Layout only — .table carries the borders, type and hover from the design system. */
 .wrapper {
   overflow-x: auto;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-.table th,
-.table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #e3e1e1;
+/* Day columns are numeric, so they centre; the project column stays left-aligned. */
+.table th:not(:first-child),
+.table td:not(:first-child) {
+  text-align: center;
 }
 
 .dayName {
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .dayDate {
   display: block;
   font-weight: 400;
-  color: #605d5d;
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: none;
   letter-spacing: normal;
 }
 
 .legend {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   font-size: 12px;
-  color: #605d5d;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
 
 .empty {
-  padding: 16px 0;
-  color: #605d5d;
+  padding: var(--space-4) 0;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
   font-style: italic;
+  text-align: left;
 }

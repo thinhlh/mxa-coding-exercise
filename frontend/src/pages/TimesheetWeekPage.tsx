@@ -3,7 +3,7 @@ import { useAuth } from 'react-oidc-context'
 import { AddLineItemForm } from '../components/AddLineItemForm'
 import { WeekGrid } from '../components/WeekGrid'
 import { dailyTotals, daysOverLimit } from '../domain/hours'
-import { DAYS, isBeforeCurrentWeek, WEEKDAYS } from '../domain/week'
+import { DAYS, formatWeekStart, isBeforeCurrentWeek, WEEKDAYS } from '../domain/week'
 import { useTimesheetWeek } from '../hooks/useTimesheetWeek'
 import { ApiError } from '../services/api'
 import type { Me } from '../types/me'
@@ -13,13 +13,6 @@ import styles from './TimesheetWeekPage.module.css'
 interface TimesheetWeekPageProps {
   me: Me
 }
-
-const WEEK_LABEL_FORMAT = new Intl.DateTimeFormat(undefined, {
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric',
-  timeZone: 'UTC',
-})
 
 function toInputs(lineItems: LineItem[]): LineItemInput[] {
   return lineItems.map((item) => ({ projectCode: item.projectCode, hours: item.hours }))
@@ -87,18 +80,21 @@ export function TimesheetWeekPage({ me }: TimesheetWeekPageProps) {
   return (
     <section className={styles.page}>
       <div className={styles.header}>
-        <h2>Your timesheet — {me.displayName}</h2>
-        <div className={styles.nav}>
-          <button type="button" className={styles.navButton} onClick={goToPreviousWeek}>
+        <div>
+          <h2>Your timesheet</h2>
+          <span className="text-muted">{me.displayName}</span>
+        </div>
+        <div className={styles.weekNav}>
+          <button type="button" className="btn btn-secondary" onClick={goToPreviousWeek}>
             ← Previous
           </button>
           <span className={styles.weekLabel}>
-            Week of {WEEK_LABEL_FORMAT.format(new Date(`${timesheet.weekStart}T00:00:00Z`))}
+            Week of {formatWeekStart(timesheet.weekStart)}
           </span>
-          <button type="button" className={styles.navButton} onClick={goToThisWeek}>
+          <button type="button" className="btn btn-secondary" onClick={goToThisWeek}>
             This week
           </button>
-          <button type="button" className={styles.navButton} onClick={goToNextWeek} disabled={!canGoToNextWeek}>
+          <button type="button" className="btn btn-secondary" onClick={goToNextWeek} disabled={!canGoToNextWeek}>
             Next →
           </button>
         </div>
@@ -146,16 +142,16 @@ export function TimesheetWeekPage({ me }: TimesheetWeekPageProps) {
           <input
             type="text"
             placeholder="Message for your manager (optional)"
-            className={styles.messageInput}
+            className={`input ${styles.messageInput}`}
             value={message}
             onChange={(event) => setMessage(event.target.value)}
           />
-          <button type="button" className={styles.secondaryButton} onClick={handleSave} disabled={saving}>
+          <button type="button" className="btn btn-secondary" onClick={handleSave} disabled={saving}>
             Save
           </button>
           <button
             type="button"
-            className={styles.button}
+            className="btn btn-primary"
             onClick={handleSubmit}
             disabled={saving || overLimitDays.length > 0}
           >

@@ -20,7 +20,7 @@ export function LoginPage({ onSignIn }: LoginPageProps) {
       </div>
       <div className={styles.panel}>
         <h2 className={styles.panelHeading}>Sign in to continue</h2>
-        <button type="button" className={styles.button} onClick={onSignIn}>
+        <button type="button" className={`btn btn-primary btn-block ${styles.button}`} onClick={onSignIn}>
           Continue with company account
           <span className={styles.buttonArrow} aria-hidden="true">
             →

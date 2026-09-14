@@ -1,6 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap');
+/* The design system first — it owns the tokens, the base element styles and the
+   component classes (.btn, .input, .field, .table, .nav, .dialog, .tag, .card).
+   Everything below is app-level only: things the design system has no opinion on. */
+@import './design-system/modernist.css';
 
-body {
-  margin: 0;
-  font-family: 'Archivo', system-ui, sans-serif;
+:root {
+  /* App semantics the design system doesn't ship a hue for.
+     Over-limit reuses the accent ramp (Modernist's accent already reads as "stop");
+     "flagged" needs to stay distinguishable from it, so it gets its own amber,
+     picked to sit in Modernist's lightness range. */
+  --color-warning-bg: #f7e2a8;
+  --color-warning-text: #5c4200;
+  --color-danger-bg: var(--color-accent-200);
+  --color-danger-text: var(--color-accent-800);
+
+  /* One column width for every page's content. */
+  --app-page-max: 960px;
+  --app-page-pad-block: var(--space-8);
+  --app-page-pad-inline: calc(var(--space-4) * 2.5);
+}
+
+/* Codes are read character-by-character and compared against each other, so they
+   are always set in a monospace face wherever they appear. */
+.code-text {
+  font-family: ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  font-weight: var(--font-heading-weight);
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --app-page-pad-block: var(--space-6);
+    --app-page-pad-inline: var(--space-4);
+  }
 }

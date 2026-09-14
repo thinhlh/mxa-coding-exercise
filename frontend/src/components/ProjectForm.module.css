@@ -1,0 +1,11 @@
+/* Layout only — the fields, buttons and type all come from the design system. */
+.form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-accent-700);
+}

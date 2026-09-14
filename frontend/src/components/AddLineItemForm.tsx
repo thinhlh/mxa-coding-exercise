@@ -43,12 +43,12 @@ export function AddLineItemForm({ token, existingCodes, onAdd }: AddLineItemForm
       <input
         type="text"
         placeholder="Project code"
-        className={styles.input}
+        className={`input ${styles.input}`}
         value={code}
         onChange={(event) => setCode(event.target.value)}
         maxLength={6}
       />
-      <button type="submit" className={styles.button} disabled={resolving || !code.trim()}>
+      <button type="submit" className="btn btn-primary" disabled={resolving || !code.trim()}>
         Add line item
       </button>
       {error && <span className={styles.error}>{error}</span>}

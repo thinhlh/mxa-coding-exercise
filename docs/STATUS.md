@@ -16,6 +16,6 @@ Update this when a phase starts or finishes — nothing else.
 | 8 — Frontend foundation | ✅ |
 | 9 — Frontend rule mirror | ✅ |
 | 10 — Week grid | ✅ |
-| 11 — Projects page | ⬜ |
-| 12 — Review pages | ⬜ |
+| 11 — Projects page | ✅ |
+| 12 — Review pages | ✅ |
 | 13 — Wiring and setup | ⬜ |

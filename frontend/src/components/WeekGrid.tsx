@@ -10,13 +10,14 @@ interface WeekGridProps {
   lineItems: LineItem[]
   days: readonly Weekday[]
   editable: boolean
-  onHoursChange: (index: number, day: Weekday, value: number) => void
-  onRemoveLineItem: (index: number) => void
+  onHoursChange?: (index: number, day: Weekday, value: number) => void
+  onRemoveLineItem?: (index: number) => void
 }
 
 const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
 // The totals row recomputes from `lineItems` on every render — the employee sees it change as they type.
+// A read-only grid (a manager reviewing a week) passes neither callback.
 export function WeekGrid({ weekStart, lineItems, days, editable, onHoursChange, onRemoveLineItem }: WeekGridProps) {
   const dates = datesForWeek(weekStart)
   const totals = dailyTotals(lineItems.map((item) => item.hours))
@@ -25,7 +26,7 @@ export function WeekGrid({ weekStart, lineItems, days, editable, onHoursChange, 
 
   return (
     <div className={styles.wrapper}>
-      <table className={styles.table}>
+      <table className={`table ${styles.table}`}>
         <thead>
           <tr>
             <th>Project</th>
@@ -52,8 +53,8 @@ export function WeekGrid({ weekStart, lineItems, days, editable, onHoursChange, 
                 lineItem={lineItem}
                 days={days}
                 editable={editable}
-                onHoursChange={(day, value) => onHoursChange(index, day, value)}
-                onRemove={() => onRemoveLineItem(index)}
+                onHoursChange={(day, value) => onHoursChange?.(index, day, value)}
+                onRemove={() => onRemoveLineItem?.(index)}
               />
             ))
           )}

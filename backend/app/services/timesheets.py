@@ -119,6 +119,11 @@ def _check_daily_cap(inputs: list[LineItemInput]) -> None:
 
 def _apply_line_items(session: Session, timesheet: Timesheet, resolved: list[tuple[Project, LineItemInput]]) -> None:
     timesheet.line_items.clear()
+    # A single flush emits every insert before every delete, so the old rows must go
+    # first: otherwise re-saving a week that already lists a project code collides with
+    # the (timesheet_id, project_id) unique constraint.
+    session.flush()
+
     for project, item in resolved:
         timesheet.line_items.append(
             TimesheetLineItem(

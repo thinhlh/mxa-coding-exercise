@@ -1,5 +1,6 @@
 .row {
-  font-weight: 800;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
 }
 
 .label {
@@ -10,9 +11,12 @@
   text-align: center;
 }
 
+/* A flagged day is a warning the employee can still submit through; an over-limit day
+   is a rejection. They must not read as the same state, so they take different hues
+   as well as different glyphs. */
 .flagged {
-  background: #fbe8b0;
-  color: #6b4e00;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .flagged::after {
@@ -20,6 +24,6 @@
 }
 
 .overLimit {
-  background: #f6c8c4;
-  color: #7a1c14;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }

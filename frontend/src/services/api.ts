@@ -10,7 +10,9 @@ export class ApiError extends Error {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+// `||`, not `??`: docker compose passes an empty string for a variable its
+// `.env` never set, and an empty base URL would post to the Vite dev server.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 interface ApiFetchOptions extends RequestInit {
   token: string

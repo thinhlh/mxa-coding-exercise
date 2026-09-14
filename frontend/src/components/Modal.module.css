@@ -1,0 +1,6 @@
+/* The design system's .dialog-backdrop covers the viewport but says nothing about
+   stacking or overflow — a long form still has to scroll. */
+.backdrop {
+  z-index: 100;
+  overflow-y: auto;
+}

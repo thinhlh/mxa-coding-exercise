@@ -18,13 +18,13 @@ export function LineItemRow({ lineItem, days, editable, onHoursChange, onRemove 
         <span className={styles.projectName}>{lineItem.projectName}</span>
       </td>
       {days.map((day) => (
-        <td key={day} className={styles.hourCell}>
+        <td key={day}>
           {editable ? (
             <input
               type="number"
               min={0}
               step={1}
-              className={styles.hourInput}
+              className={`input ${styles.hourInput}`}
               value={lineItem.hours[day]}
               onChange={(event) => onHoursChange(day, Number(event.target.value))}
             />
@@ -35,7 +35,7 @@ export function LineItemRow({ lineItem, days, editable, onHoursChange, onRemove 
       ))}
       <td>
         {editable && (
-          <button type="button" className={styles.removeButton} onClick={onRemove}>
+          <button type="button" className="btn btn-ghost" onClick={onRemove}>
             Remove
           </button>
         )}
