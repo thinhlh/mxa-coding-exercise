@@ -3,69 +3,54 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import date, datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.auth import CurrentEmployee
 from app.domain.hours import LineItemHours, daily_totals, days_over_limit
-from app.domain.review import EDITABLE_STATUSES, IllegalTransitionError, approve, reject, submit
+from app.domain.review import EDITABLE_STATUSES, IllegalTransitionError, TimesheetStatus, approve, reject, submit
 from app.domain.week import DAYS, week_start_for
 from app.models import Project, Timesheet, TimesheetLineItem
-from app.schemas.timesheet import LineItemInput, TimesheetWriteRequest
-
-
-class TimesheetStatus(str, Enum):
-    DRAFT = "draft"
-    SUBMITTED = "submitted"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-
+from app.schemas.timesheet import LineItemInput, LineItemResponse, TimesheetResponse, TimesheetWriteRequest
 
 _REVIEW_ACTIONS = {TimesheetStatus.APPROVED: approve, TimesheetStatus.REJECTED: reject}
 _REVIEW_VERBS = {TimesheetStatus.APPROVED: "approve", TimesheetStatus.REJECTED: "reject"}
-
-
-def _parse_status(raw_status: str) -> TimesheetStatus:
-    try:
-        return TimesheetStatus(raw_status)
-    except ValueError:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"no such timesheet status {raw_status}") from None
 
 
 def _line_item_hours(line_item: TimesheetLineItem) -> LineItemHours:
     return LineItemHours(**{day: getattr(line_item, f"hours_{day}") for day in DAYS})
 
 
-def _serialize(timesheet: Timesheet | None, *, employee_name: str, week_start) -> dict:
+def _line_item_response(item: TimesheetLineItem) -> LineItemResponse:
+    return LineItemResponse(
+        project_code=item.project.code,
+        project_name=item.project.name,
+        hours={day: getattr(item, f"hours_{day}") for day in DAYS},
+    )
+
+
+def _serialize(timesheet: Timesheet | None, *, employee_name: str, week_start: date) -> TimesheetResponse:
     line_items = timesheet.line_items if timesheet else []
     totals = daily_totals([_line_item_hours(item) for item in line_items])
 
-    return {
-        "id": timesheet.id if timesheet else None,
-        "week_start": timesheet.week_start if timesheet else week_start,
-        "status": timesheet.status if timesheet else TimesheetStatus.DRAFT,
-        "employee_name": employee_name,
-        "line_items": [
-            {
-                "project_code": item.project.code,
-                "project_name": item.project.name,
-                "hours": {day: getattr(item, f"hours_{day}") for day in DAYS},
-            }
-            for item in line_items
-        ],
-        "daily_totals": totals,
-        "total_hours": sum(totals.values()),
-        "submit_message": timesheet.submit_message if timesheet else None,
-        "review_message": timesheet.review_message if timesheet else None,
-        "submitted_at": timesheet.submitted_at if timesheet else None,
-        "reviewed_at": timesheet.reviewed_at if timesheet else None,
-    }
+    return TimesheetResponse(
+        id=timesheet.id if timesheet else None,
+        week_start=timesheet.week_start if timesheet else week_start,
+        status=timesheet.status if timesheet else TimesheetStatus.DRAFT,
+        employee_name=employee_name,
+        line_items=[_line_item_response(item) for item in line_items],
+        daily_totals=totals,
+        total_hours=sum(totals.values()),
+        submit_message=timesheet.submit_message if timesheet else None,
+        review_message=timesheet.review_message if timesheet else None,
+        submitted_at=timesheet.submitted_at if timesheet else None,
+        reviewed_at=timesheet.reviewed_at if timesheet else None,
+    )
 
 
-def get_timesheet_for_week(session: Session, current: CurrentEmployee, at: int | None) -> dict:
+def get_timesheet_for_week(session: Session, current: CurrentEmployee, at: int | None) -> TimesheetResponse:
     epoch_seconds = at if at is not None else int(datetime.now(timezone.utc).timestamp())
     week_start = week_start_for(epoch_seconds)
 
@@ -78,11 +63,9 @@ def get_timesheet_for_week(session: Session, current: CurrentEmployee, at: int |
 
 
 def list_timesheets(
-    session: Session, current: CurrentEmployee, timesheet_status: str, project_id: uuid.UUID | None = None
-) -> list[dict]:
-    target = _parse_status(timesheet_status)
-
-    query = session.query(Timesheet).filter(Timesheet.status == target.value)
+    session: Session, current: CurrentEmployee, timesheet_status: TimesheetStatus, project_id: uuid.UUID | None = None
+) -> list[TimesheetResponse]:
+    query = session.query(Timesheet).filter(Timesheet.status == timesheet_status)
     if current.role == "employee":
         query = query.filter(Timesheet.employee_id == current.id)
     if project_id is not None:
@@ -160,7 +143,7 @@ def _write_editable(
         .one_or_none()
     )
     if timesheet is None:
-        timesheet = Timesheet(employee_id=current.id, week_start=week_start, status=TimesheetStatus.DRAFT.value)
+        timesheet = Timesheet(employee_id=current.id, week_start=week_start, status=TimesheetStatus.DRAFT)
         session.add(timesheet)
     elif timesheet.status not in EDITABLE_STATUSES:
         raise HTTPException(status.HTTP_409_CONFLICT, f"a {timesheet.status} timesheet cannot be edited")
@@ -172,7 +155,7 @@ def _write_editable(
         timesheet.submitted_at = datetime.now(timezone.utc)
         timesheet.submit_message = body.message
     else:
-        timesheet.status = TimesheetStatus.DRAFT.value
+        timesheet.status = TimesheetStatus.DRAFT
 
     session.commit()
     return timesheet
@@ -207,10 +190,10 @@ def _write_review(
     return timesheet
 
 
-def write_timesheet(session: Session, current: CurrentEmployee, target_status: str, body: TimesheetWriteRequest) -> dict:
-    target = _parse_status(target_status)
-
-    handler = _write_review if target in _REVIEW_ACTIONS else _write_editable
-    timesheet = handler(session, current, target, body)
+def write_timesheet(
+    session: Session, current: CurrentEmployee, target_status: TimesheetStatus, body: TimesheetWriteRequest
+) -> TimesheetResponse:
+    handler = _write_review if target_status in _REVIEW_ACTIONS else _write_editable
+    timesheet = handler(session, current, target_status, body)
 
     return _serialize(timesheet, employee_name=timesheet.employee.display_name, week_start=timesheet.week_start)
