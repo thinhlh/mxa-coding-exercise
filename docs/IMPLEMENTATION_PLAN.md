@@ -16,7 +16,7 @@ deploy/           docker-compose.yml, Keycloak realm import
 | Backend | Python 3.12, FastAPI, `pip` + `venv` |
 | Database | One PostgreSQL 16 instance, two databases in it: `mxa` and `keycloak` |
 | ORM | SQLAlchemy 2.0 typed models, Alembic |
-| Frontend | React 18, TypeScript, Vite, `react-router-dom`, plain CSS, `yarn` |
+| Frontend | React 18, TypeScript, Vite, `react-router-dom`, CSS Modules per component (ADR 0003), `yarn` |
 | Frontend fetching | `fetch` in `services/`, `useState`/`useEffect` in `hooks/` — no query library |
 | Auth | Keycloak OIDC, PKCE in the browser, JWT validated against JWKS on the API |
 | Week resolution | Client sends seconds since epoch, server resolves it to that week's Monday (ADR 0002) |
@@ -41,7 +41,7 @@ A weekday of 0 is flagged but submittable. A Sunday of 12 is legal and
 unflagged. A Monday of 25 is refused.
 
 ADR 0001 puts these rules in the browser and the API. Both sides test the same
-boundaries (Phase 1, Phase 8): exactly 24, exactly 8, a weekday of 0, two line
+boundaries (Phase 1, Phase 9): exactly 24, exactly 8, a weekday of 0, two line
 items summing to 25 on one day, an untouched weekend, `7.5 + 0.5 == 8`.
 
 Current implementation note: the 24-hour cap and the 8-hour flag are enforced
@@ -218,14 +218,15 @@ lookup so codes match case-insensitively.
 
 ## Phases
 
-Phases 1, 2, 3, 7 and 8 can start as soon as Phase 0 lands.
+Phases 1, 2, 3 and 4 can start as soon as Phase 0 lands.
 
 ```
-Phase 0 ──┬── Phase 1 ──┬── Phase 4 ── Phase 5 ── Phase 6
+Phase 0 ──┬── Phase 1 ──┬── Phase 5 ── Phase 6 ── Phase 7
           ├── Phase 2 ──┤
           ├── Phase 3 ──┘
-          └── Phase 7 ──┬── Phase 9 ── Phase 10 ── Phase 11 ── Phase 12
-                        └── Phase 8 ──┘
+          ├── Phase 4 ──┐
+          └── Phase 8 ──┼── Phase 10 ── Phase 11 ── Phase 12 ── Phase 13
+                        └── Phase 9 ──┘
 ```
 
 ### Phase 0 — Scaffolding
@@ -257,7 +258,7 @@ Phase 0 ──┬── Phase 1 ──┬── Phase 4 ── Phase 5 ── Ph
   network, not the browser-facing host — the two can't be derived from one
   another. No default that differs from a deployed value. `docker-compose.yml`
   reads its own values (DB and Keycloak admin credentials, these five) from
-  `deploy/.env`, gitignored, with `deploy/.env.example` checked in; the two
+  `.env`, gitignored, with `.env.example` checked in; the two
   credential passwords are stored
   base64-encoded there and decoded by the `Makefile` before `docker compose`
   runs.
@@ -303,7 +304,17 @@ both roles or neither is a 403 — do not pick one. `GET /api/me` ships here.
 _Done:_ no token 401, wrong role 403, employee token upserts a row — tested
 with a locally signed key, not a live Keycloak.
 
-### Phase 4 — Projects API
+### Phase 4 — Login page
+
+`frontend/src/pages/LoginPage.tsx`: the branded screen from the design, one
+button, "Continue with company account", calling `signinRedirect()` from
+`react-oidc-context`. Keycloak still owns the actual sign-in — this page is
+just the hand-off.
+
+_Done:_ a signed-out visitor sees this page instead of an immediate redirect,
+and the button sends them to Keycloak.
+
+### Phase 5 — Projects API
 
 `app/api/projects.py` and its schemas. Manager-only creation; the manager comes
 from the token, not the body. A `code` in the request body is ignored.
@@ -312,7 +323,7 @@ _Done:_ tests cover a six-character code on create, `managerName` from the
 join, 403 for an employee, a client-supplied code never reaching the database,
 case-insensitive lookup, 404 on an unknown code.
 
-### Phase 5 — Timesheets API, employee side
+### Phase 6 — Timesheets API, employee side
 
 `app/api/timesheets.py`: `GET /api/timesheets`, `GET /api/timesheets/{status}`,
 `POST /api/timesheets/{status}` for `draft` and `submitted`. Resolve the week,
@@ -326,7 +337,7 @@ over 24 refused on both statuses, an empty timesheet refused on submit, 409
 editing after submit, 200 editing after reject, a mid-week timestamp resolving
 to the right Monday, and one employee unable to read another's week.
 
-### Phase 6 — Review API, manager side
+### Phase 7 — Review API, manager side
 
 The same handler plus `approved` and `rejected`; open
 `GET /api/timesheets/{status}` to managers across all employees.
@@ -335,7 +346,7 @@ _Done:_ tests cover only `submitted` in the submitted list, status moves with
 `reviewMessage` stored, 409 approving an approved timesheet, 403 for an
 employee, and a rejected timesheet editable by its employee again.
 
-### Phase 7 — Frontend foundation
+### Phase 8 — Frontend foundation
 
 Vite app; `react-oidc-context` on the `mxa-web` client with PKCE;
 `services/api.ts` attaching the token and turning `{"detail": …}` into a thrown
@@ -346,7 +357,7 @@ managers. Named exports; `hooks/` state, `services/` HTTP, `types/` types.
 _Done:_ the seeded employee lands on the grid, the seeded manager on the queue,
 and an expired token returns the user to Keycloak.
 
-### Phase 8 — Frontend rule mirror
+### Phase 9 — Frontend rule mirror
 
 `frontend/src/domain/hours.ts` and `week.ts` — same functions and day ordering
 as Phase 1. Compare on a rounded value so `7.5 + 0.5` reads as 8.
@@ -354,7 +365,7 @@ as Phase 1. Compare on a rounded value so `7.5 + 0.5` reads as 8.
 _Done:_ `hours.test.ts` and `week.test.ts` assert the same outcomes as the
 pytest domain suite for every case under **The rules**.
 
-### Phase 9 — Week grid
+### Phase 10 — Week grid
 
 `pages/TimesheetWeekPage.tsx` with `components/WeekGrid.tsx`,
 `LineItemRow.tsx`, `DailyTotalsRow.tsx`, `AddLineItemForm.tsx`.
@@ -377,7 +388,7 @@ pytest domain suite for every case under **The rules**.
 _Done:_ an employee fills a week, sees Friday flagged at 4 hours, is blocked at
 25 hours on a day, submits with a message, and finds the grid read-only.
 
-### Phase 10 — Projects page
+### Phase 11 — Projects page
 
 `pages/ProjectsPage.tsx`, `components/ProjectForm.tsx`: name, description,
 start date — the manager is the signed-in user, not an input — plus the list of
@@ -387,7 +398,7 @@ No code input anywhere.
 _Done:_ a manager creates a project, reads the code off the screen, and an
 employee adds a line item with it.
 
-### Phase 11 — Review pages
+### Phase 12 — Review pages
 
 `pages/ReviewQueuePage.tsx`: employee name, week, total hours, flagged-day
 indicator, `submitMessage`. `pages/TimesheetReviewPage.tsx`: the employee's
@@ -398,7 +409,7 @@ _Done:_ a manager opens a submitted timesheet, sees the flagged days, approves
 and it leaves the queue; rejecting with a message returns it to the employee as
 editable with the message shown.
 
-### Phase 12 — Wiring and setup
+### Phase 13 — Wiring and setup
 
 End-to-end from `make up` on a clean machine: project creation → code → line
 items → submit → approve. Finish README **Setup** with the real commands, the

@@ -16,13 +16,8 @@ function renderApp() {
 }
 
 describe('App', () => {
-  it('renders the app title', () => {
+  it('shows the login page to an unauthenticated visitor', () => {
     renderApp()
-    expect(screen.getByText('MXA Timesheet')).toBeInTheDocument()
-  })
-
-  it('sends an unauthenticated visitor to sign in', () => {
-    renderApp()
-    expect(screen.getByText('Redirecting to sign in…')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Continue with company account' })).toBeInTheDocument()
   })
 })

@@ -1,35 +1,32 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
+import { LoginPage } from '../pages/LoginPage'
 import { RoleAwareShell } from './RoleAwareShell'
 
 export function AuthGate() {
   const auth = useAuth()
   const { isLoading, isAuthenticated, activeNavigator, error, events, signinRedirect } = auth
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && !activeNavigator && !error) {
+  const signIn = useCallback(
+    () =>
       signinRedirect().catch(() => {
         // A failed redirect surfaces through auth.error on the next render.
-      })
-    }
-  }, [isLoading, isAuthenticated, activeNavigator, error, signinRedirect])
-
-  useEffect(
-    () =>
-      events.addAccessTokenExpired(() => {
-        signinRedirect().catch(() => {
-          // A failed redirect surfaces through auth.error on the next render.
-        })
       }),
-    [events, signinRedirect],
+    [signinRedirect],
   )
+
+  useEffect(() => events.addAccessTokenExpired(signIn), [events, signIn])
 
   if (error) {
     return <p role="alert">Sign-in failed: {error.message}</p>
   }
 
+  if (activeNavigator === 'signinRedirect') {
+    return <p>Taking you to sign in…</p>
+  }
+
   if (isLoading || !isAuthenticated) {
-    return <p>Redirecting to sign in…</p>
+    return <LoginPage onSignIn={signIn} />
   }
 
   return <RoleAwareShell />

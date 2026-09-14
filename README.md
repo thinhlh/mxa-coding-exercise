@@ -67,12 +67,12 @@ are not for a deployed environment.
 ## Run everything
 
 ```
-cp deploy/.env.example deploy/.env  # first time only
+cp .env.example .env  # first time only
 make up
 ```
 
 Builds and starts Postgres, Keycloak, the backend and the frontend via
-`docker compose`, reading credentials and settings from `deploy/.env`. The
+`docker compose`, reading credentials and settings from `.env`. The
 frontend is served at http://localhost:5173, the API at http://localhost:8000,
 Keycloak at http://localhost:8080.
 

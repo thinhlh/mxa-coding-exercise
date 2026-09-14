@@ -1,12 +1,7 @@
 import { AuthGate } from './auth/AuthGate'
 
 function App() {
-  return (
-    <main>
-      <h1>MXA Timesheet</h1>
-      <AuthGate />
-    </main>
-  )
+  return <AuthGate />
 }
 
 export default App
