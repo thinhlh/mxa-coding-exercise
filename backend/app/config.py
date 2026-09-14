@@ -8,6 +8,7 @@ class Settings(BaseSettings):
 
     database_url: str
     keycloak_issuer: str
+    keycloak_jwks_url: str
     keycloak_audience: str
     cors_origins: str
 

@@ -49,6 +49,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+      KEYCLOAK_JWKS_URL: ${KEYCLOAK_JWKS_URL}
       KEYCLOAK_AUDIENCE: ${KEYCLOAK_AUDIENCE}
       CORS_ORIGINS: ${CORS_ORIGINS}
     ports:

@@ -44,6 +44,11 @@ ADR 0001 puts these rules in the browser and the API. Both sides test the same
 boundaries (Phase 1, Phase 8): exactly 24, exactly 8, a weekday of 0, two line
 items summing to 25 on one day, an untouched weekend, `7.5 + 0.5 == 8`.
 
+Current implementation note: the 24-hour cap and the 8-hour flag are enforced
+in the frontend grid only, plus a Pydantic check on the 24-hour cap in the
+API's write request body — neither is a domain function or a DB constraint,
+and the API does not compute or return `flaggedDays`.
+
 ## Data model
 
 Hours are `NUMERIC(4,2)`. `week_start` is always a Monday.
@@ -245,10 +250,15 @@ Phase 0 ──┬── Phase 1 ──┬── Phase 4 ── Phase 5 ── Ph
 - Root `Makefile`, two targets: `up` (compose up, build) and `test` (pytest and
   vitest).
 - Settings from the environment: `DATABASE_URL`, `KEYCLOAK_ISSUER`,
-  `KEYCLOAK_AUDIENCE`, `CORS_ORIGINS`. No default that differs from a deployed
-  value. `docker-compose.yml` reads its own values (DB and Keycloak admin
-  credentials, these four) from `deploy/.env`, gitignored, with
-  `deploy/.env.example` checked in; the two credential passwords are stored
+  `KEYCLOAK_JWKS_URL`, `KEYCLOAK_AUDIENCE`, `CORS_ORIGINS`. `KEYCLOAK_ISSUER`
+  must match the token's `iss` claim (the URL the browser reaches Keycloak
+  at); `KEYCLOAK_JWKS_URL` is where the backend itself fetches signing keys
+  from, which on `docker compose` is the `keycloak` service on the compose
+  network, not the browser-facing host — the two can't be derived from one
+  another. No default that differs from a deployed value. `docker-compose.yml`
+  reads its own values (DB and Keycloak admin credentials, these five) from
+  `deploy/.env`, gitignored, with `deploy/.env.example` checked in; the two
+  credential passwords are stored
   base64-encoded there and decoded by the `Makefile` before `docker compose`
   runs.
 - README **Setup** section, replacing TBD.
@@ -285,11 +295,10 @@ timesheet with two line items and reads it back.
 
 ### Phase 3 — Authentication and roles
 
-`app/auth.py`: cache the realm JWKS, validate the token (signature, `iss`,
+`app/auth.py`: fetch the realm JWKS, validate the token (signature, `iss`,
 `aud`, `exp`), read realm roles, expose `current_employee` (upserting the
-subject into `employees`), `require_employee`, `require_manager`. Timeout and
-retry the JWKS fetch. A token with both roles or neither is a 403 — do not pick
-one. `GET /api/me` ships here.
+subject into `employees`), `require_employee`, `require_manager`. A token with
+both roles or neither is a 403 — do not pick one. `GET /api/me` ships here.
 
 _Done:_ no token 401, wrong role 403, employee token upserts a row — tested
 with a locally signed key, not a live Keycloak.
